@@ -1,0 +1,26 @@
+FROM php:8.1-apache-buster
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libzip-dev \
+    unzip \
+    wget \
+    && docker-php-ext-install -j$(nproc) iconv mysqli pdo_mysql zip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && a2enmod rewrite
+
+# Download and install Nextcloud
+RUN wget https://download.nextcloud.com/server/releases/latest.zip && \
+    unzip latest.zip && \
+    rm -rf latest.zip && \
+    mv nextcloud/* /var/www/html/ && \
+    chown -R www-data:www-data /var/www/html/nextcloud && \
+    chmod -R 775 /var/www/html/nextcloud
+
+# Start Apache
+CMD ["apache2-foreground"]
+

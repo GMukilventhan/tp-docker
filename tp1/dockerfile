@@ -1,0 +1,25 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update && apt install -y  php8.1-curl php8.1-xml php8.1-fileinfo php8.1-mbstring php8.1-zip php8.1-bcmath php8.1 wget unzip
+
+ADD nextcloud.conf /etc/apache2/sites-available/nextcloud.conf
+
+RUN a2enmod rewrite && \
+    a2dissite 000-default.conf && \
+    a2ensite nextcloud.conf && \
+    a2enmod headers && \
+    a2enmod env && \
+    a2enmod dir && \
+    a2enmod mime
+
+WORKDIR /var/www
+
+RUN wget https://download.nextcloud.com/server/releases/latest.zip && \
+    unzip latest.zip && \
+    rm -rf latest.zip && \
+    chown -R www-data:www-data nextcloud/ && \
+    apt clean && \
+    apt purge
+
+CMD ["apachectl","-D","FOREGROUND"]

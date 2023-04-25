@@ -1,0 +1,28 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y \
+        apache2 \
+        libapache2-mod-php \
+        php \
+        php-gd \
+        php-json \
+        php-mbstring \
+        php-mysql \
+        php-xml \
+        wget
+
+RUN wget https://download.nextcloud.com/server/releases/nextcloud-23.0.0.tar.bz2 && \
+    tar -xvf nextcloud-23.0.0.tar.bz2 && \
+    rm nextcloud-23.0.0.tar.bz2 && \
+    mv nextcloud /var/www/html/
+
+COPY nextcloud.conf /etc/apache2/sites-available/
+RUN ln -s /etc/apache2/sites-available/nextcloud.conf /etc/apache2/sites-enabled/nextcloud.conf && \
+    rm /etc/apache2/sites-enabled/000-default.conf && \
+    a2enmod rewrite && \
+    chown -R www-data:www-data /var/www/html/nextcloud
+
+EXPOSE 8081
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
