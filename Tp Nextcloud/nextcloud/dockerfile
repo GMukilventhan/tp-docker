@@ -1,0 +1,39 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt update -y && apt install -y software-properties-common && \
+    apt update -y && \
+    apt install -y apache2 \
+    libapache2-mod-php \
+    php8.1 \
+    php8.1-gd \
+    php8.1-mysql \
+    php8.1-curl \
+    php8.1-zip \
+    php8.1-intl \
+    php8.1-mbstring \
+    php8.1-xml \
+    unzip \
+    wget \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR /var/www/
+
+RUN wget https://download.nextcloud.com/server/releases/latest.zip && \
+    unzip latest.zip && \
+    rm latest.zip && \
+    chown -R www-data:www-data /var/www/
+
+RUN a2enmod rewrite
+COPY nextcloud.conf /etc/apache2/sites-available/
+RUN ln -s /etc/apache2/sites-available/nextcloud.conf /etc/apache2/sites-enabled/nextcloud.conf
+RUN rm /etc/apache2/sites-enabled/000-default.conf && \
+    apt remove -y unzip wget && apt purge -y unzip wget && \
+    apt autoremove -y
+
+EXPOSE 80
+
+CMD ["apache2ctl", "-D", "FOREGROUND"]
