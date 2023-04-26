@@ -1,7 +1,0 @@
-FROM mysql:latest
-ENV MYSQL_ROOT_PASSWORD=pass
-ENV MYSQL_DATABASE=wordpress
-ENV MYSQL_USER=wordpress
-ENV MYSQL_PASSWORD=pass
-COPY db.sql /docker-entrypoint-initdb.d/db.sql
-
